@@ -1,0 +1,148 @@
+body {
+    background: lightgray !important;
+}
+
+#app {
+    height: 100%;
+    margin: 2px;
+    padding: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.toolbar {
+    /*border: 1px solid #e2ecf4;*/
+    /*padding: 5px;*/
+    /*border-radius: 5px;*/
+    flex: 0;
+    height: 33px;
+}
+
+.main-task {
+    flex: 1;
+    margin-top: 5px;
+    display: flex;
+    align-items: stretch;
+    padding: 0px;
+    min-height: 0px;
+}
+
+.categoraties {
+    flex: 0;
+    margin-right: 5px;
+    height: 100%;
+}
+
+.at-menu--inline {
+    border: 1px solid #e2ecf4;
+    border-radius: 5px;
+    height: 100%;
+}
+
+.task-content {
+    flex: 1;
+    border-radius: 5px;
+    border: 1px solid #e2ecf4;
+    background-color: #ffff;
+    min-height: 0px;
+    min-width: 0px;
+}
+
+.at-table {
+    height: 100% !important;
+}
+
+.at-table__content {
+    border: 0 !important;
+    border-radius: 5px;
+    height: 100% !important;
+}
+/*
+.at-table__header {
+    position: relative !important;
+    height: 10%;
+}
+
+.at-table__header > table {
+    border: unset !important;
+}
+*/
+.at-table__thead th {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 1 !important;
+}
+
+.at-table__body {
+    height: 100% !important;
+    margin-top: unset !important;
+    overflow: auto;
+}
+
+.at-table__tbody > tr {
+    cursor: pointer;
+}
+
+.task-details {
+    flex: 0;
+    background-color: #ffff;
+    margin-top: 5px;
+    min-height: 200px;
+    width: 100%;
+    /*border: 1px solid #333;*/
+    border: 1px solid #e2ecf4;
+    border-radius: 5px;
+    padding: 2px 5px 5px 5px;
+    font-size: 13px;
+}
+
+/*.task-details table {
+    padding-left: 5px;
+}*/
+
+.task-details fieldset {
+    padding: 0px 0 0 5px;
+    border: 1px solid #D0D0D0;
+    border-radius: 5px;
+    height: 100%;
+    width: 100%;
+    overflow: auto;
+}
+
+.task-details legend {
+    font-weight: bold;
+}
+
+.task-details table {
+    table-layout: fixed;
+    width: 100%;
+    white-space: nowrap;
+}
+
+/*.detail-header {
+    background-color: #F7F7F7;
+}
+*/
+.form-group {
+    margin-top: 5px;
+}
+
+.external-link {
+    list-style: disc !important;
+}
+
+.external-link li {
+    margin-left: 15px;
+}
+
+.img_donate_container {
+    display: flex;
+    justify-content: space-around;
+}
+
+.img_donate_container img{
+    border-radius: 5px;
+    height: 300px;
+    cursor: pointer;
+}

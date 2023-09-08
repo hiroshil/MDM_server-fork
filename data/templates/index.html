@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Task dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/at.min.css') }}">
+    <script src="{{ url_for('static', filename='js/vue.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/at.min.js') }}"></script>
+</head>
+
+<body>
+    <div id="app">
+        <div class="toolbar">
+            <at-button icon="icon-plus" @click="toggle_add_task=true">Add</at-button>
+            <at-button icon="icon-trash" @click="btnRemoveClick">Remove</at-button>
+            <at-button icon="icon-stop-circle" @click="btnStopClick">Stop</at-button>
+            <at-button icon="icon-stop-circle" @click="btnStopAllClick">Stop All</at-button>
+            <at-button icon="icon-rotate-ccw" @click="btnRestartClick">Restart</at-button>
+            <at-button icon="icon-settings" @click="btnSettingClick">Settings</at-button>
+            <at-button icon="icon-info" @click="toggle_about=true">About</at-button>
+        </div>
+        <div class="main-task">
+            <div class="categoraties">
+                <at-menu :active-name="FILTER.ALL" mode="inline"  @on-select="filterSelected">
+                    <at-menu-item :name="FILTER.ALL"><i class="icon icon-folder"></i>All ({{"{{tasks_data.length}}"}})</at-menu-item>
+                    <at-menu-item :name="FILTER.DOWNLOADING"><i class="icon icon-download"></i>Downloading ({{"{{task_downloading.length}}"}})</at-menu-item>
+                    <at-menu-item :name="FILTER.COMPLETED"><i class="icon icon-check"></i>Completed ({{"{{task_completed.length}}"}})</at-menu-item>
+                    <at-menu-item :name="FILTER.ERROR"><i class="icon icon-x"></i>Error ({{"{{task_error.length}}"}})</at-menu-item>
+                </at-menu>
+            </div>
+            <div class="task-content">
+                <at-table @on-selection-change="taskSelected" :columns="task_headers" :data="task_filtered" ref="task_table"></at-table>
+            </div>
+        </div>
+        <div class="task-details">
+          <!--   <div class="detail-header">
+                Task detail infomation:
+            </div> -->
+            <fieldset>
+                <legend>Task detail infomation:</legend>
+                <table v-if="task_seleted">
+                    <colgroup>
+                        <col width="70px">
+                        <col min-width="70px">
+                    </colgroup>
+                    <tbody>
+                        <tr>
+                            <td><label>Url:</label></td>
+                            <td>{{"{{task_seleted.url}}"}}</td>
+                        </tr>
+                        <tr>
+                            <td><label>File name:</label></td>
+                            <td>{{"{{task_seleted.file_name}}"}}</td>
+                        </tr>
+                        <tr>
+                            <td><label>Status:</label></td>
+                            <td>{{"{{task_seleted.status}}"}}</td>
+                        </tr>
+                        <tr v-show="task_seleted.quality">
+                            <td><label>Quality:</label></td>
+                            <td>{{"{{task_seleted.quality}}"}}</td>
+                        </tr>
+                        <tr>
+                            <td><label>Path:</label></td>
+                            <td>{{"{{task_seleted.path}}"}}</td>
+                        </tr>
+                        <tr>
+                            <td><label>Create at:</label></td>
+                            <td>{{"{{task_seleted.create_at}}"}}</td>
+                        </tr>
+                        <tr v-if="task_seleted.error">
+                            <td><label>Error:</label></td>
+                            <td>{{"{{task_seleted.error}}"}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </fieldset>
+        </div>
+        <at-modal v-model="toggle_add_task" title="Add task detail" @on-confirm="addNewTaskConfirm" @on-cancel="addNewTaskCancel">
+            <div class="form-group">
+                <label>Url:</label>
+                <at-input v-model="task_new.url" placeholder="https://www.example.com"></at-input>
+            </div>
+            <div class="form-group">
+                <label>Path:</label>
+                <at-input v-model="task_new.path" placeholder="d:\meo_moe\moe.mp4"></at-input>
+            </div>
+            <div class="form-group">
+                <label>Headers:</label>
+                <at-textarea v-model="task_new.headers" placeholder="One line one header"></at-textarea>
+            </div>
+        </at-modal>
+        <at-modal v-if="restart_data" v-model="toggle_restart_task" title="Restart task" @on-confirm="btnRestartTaskConfirm" @on-cancel="btnCancelRestartTask">
+            <div class="form-group">
+                <label>Url:</label>
+                <at-input v-model="restart_data.url" disabled>current_task.url</at-input>
+            </div>
+            <div class="form-group">
+                <label>Path:</label>
+                <at-input v-model="restart_data.path" placeholder="d:\meo_moe\moe.mp4">current_task.path</at-input>
+            </div>
+            <div v-if="restart_data.qualities" class="form-group" style="margin-top: 10px">
+                <label style="margin-right: 5px">Qualities:</label>
+                <at-select v-model="restart_data.quality" style="width:130px">
+                  <at-option v-for="quality in restart_data.qualities" :value="quality" :key="quality">{{"{{quality}}"}}</at-option>
+                </at-select>    
+            </div>
+            <div class="form-group">
+                <label>Headers:</label>
+                <at-textarea v-model="restart_data.headers" placeholder="One line one header">current_task.headers</at-textarea>
+            </div>
+            <div class="form-group" style="margin-top: 10px">
+                <label style="margin-right: 5px">Force run:</label>
+                <at-switch v-model="restart_data.force_run"></at-switch>
+            </div>
+        </at-modal>
+        <at-modal v-if="config_data" v-model="toggle_settings_app" title="Settings" @on-confirm="btnSettingsConfirm" @on-cancel="btnSettingsCancel">
+             <div class="form-group">
+                <label>Download folder:</label>
+                <at-input v-model="config_data.download_dir">config_data.download_dir</at-input>
+            </div>
+             <div class="form-group">
+                <label>Max number active of downloads:</label>
+                <at-input v-model="config_data.active_downloads">config_data.active_downloads</at-input>
+            </div>
+             <div class="form-group">
+                <label>Max number of connections:</label>
+                <at-input v-model="config_data.connections">config_data.connections</at-input>
+            </div>
+            <div class="form-group" style="margin-top: 10px">
+                <label style="margin-right: 5px">Log level:</label>
+                <at-select v-model="config_data.log_level" style="width:130px">
+                  <at-option v-for="level_name in config_data.log_level_name" :value="level_name" :key="level_name">{{"{{level_name}}"}}</at-option>
+                </at-select>    
+            </div>
+        </at-modal>
+        <at-modal v-model="toggle_about" title="About" :show-footer="false" :styles="{top:'5%'}">
+            <img src="{{ url_for('static', filename='imgs/logo.jpg') }}" style="border-radius: 3px;" width="50px" height="50px">
+            <p>Copyright by Nguyễn Không</p>
+            <label>More infomation: </label>
+            <ul class="external-link">
+                <li><label>Web: </label><a target="_blank" href="https://nhtcntt.blogspot.com/">https://nhtcntt.blogspot.com/</a></li>
+                <li><label>Fb: </label><a target="_blank" href="https://www.facebook.com/profile.php?id=100009326128280">https://www.facebook.com/profile.php?id=100009326128280</a></li>
+            </ul>
+            <label>Donate me: </label>
+            <div class="img_donate_container">
+                <img alt="MoMo" src="{{ url_for('static', filename='imgs/momo.jpg') }}" onclick="window.open(this.src)">
+                <img style="border: 1px #e03 solid;" alt="Viettel Pay" src="{{ url_for('static', filename='imgs/vittel.png') }}" onclick="window.open(this.src)">
+            </div>
+        </at-modal>
+    </div>
+    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+</body>
+
+</html>

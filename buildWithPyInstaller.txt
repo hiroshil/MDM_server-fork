@@ -1,0 +1,1 @@
+pyinstaller --onefile MDM_server.spec
